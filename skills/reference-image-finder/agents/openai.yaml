@@ -1,0 +1,4 @@
+interface:
+  display_name: "原型图搜索"
+  short_description: "在抖音和小红书按文字搜索并筛选适合制作底图的公开原型图"
+  default_prompt: "使用 $reference-image-finder 帮我寻找符合要求的原型图，并给出编号候选和来源链接。"

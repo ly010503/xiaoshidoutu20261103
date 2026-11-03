@@ -1,0 +1,4 @@
+interface:
+  display_name: "照片转拼豆工作流"
+  short_description: "将照片生成Q版动漫素材，确认后自动上传并打开拼豆网站供手工修改"
+  default_prompt: "使用 $photo-to-perler-workflow 将这张照片生成适合拼豆的Q版素材，确认后上传到我的拼豆网站。"

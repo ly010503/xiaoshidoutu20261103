@@ -1,0 +1,106 @@
+/* Keep frequently used exports with the canvas; sidebars hold settings and materials. */
+.settings-section > summary { cursor: pointer; list-style: none; }
+.settings-section > summary::-webkit-details-marker { display: none; }
+.settings-section > summary::after { content: '⌄'; margin-left: auto; color: var(--lavender-dark); align-self: center; }
+.settings-section[open] > summary::after { transform: rotate(180deg); }
+.settings-section:not([open]) > summary { margin-bottom: 0; }
+.settings-section > summary:focus-visible, .compact-section > summary:focus-visible { outline: 3px solid rgba(143,123,216,.32); outline-offset: 5px; border-radius: 6px; }
+.workspace-settings .source-frame { height: 110px; }
+.workspace-settings .source-card h2 { font-size: 15px; }
+.workspace-settings .card { padding: 13px; }
+.workspace-settings .step-heading h2 { font-size: 13px; }
+.workspace-settings .size-card { min-height: 68px; border-radius: 10px; padding: 9px; }
+.workspace-settings .size-card b { margin: 5px 0 0; }
+.workspace-settings .size-card > span:nth-of-type(2), .workspace-settings .size-card .custom-size-icon { display: none; }
+.workspace-settings .size-card .recommend-tag { top: 4px; right: 4px; padding: 2px 4px; font-size: 8px !important; }
+.workspace-settings .size-card:has(.recommend-tag) { padding-top: 24px; }
+.workspace-settings .color-card { min-height: 60px; padding: 10px; border-radius: 10px; }
+.workspace-settings .color-card small { display: none; }
+.workspace-settings .style-card { min-height: 76px; }
+.workspace-settings .style-card strong { font-size: 13px; }
+.workspace-settings .style-card small, .workspace-settings .style-fit { display: none; }
+.workspace-settings .pattern-recovery-card { padding: 10px; }
+.workspace-settings .pattern-recovery-card button { min-height: 38px; }
+.workspace-settings .edit-actions button { min-height: 52px; }
+
+.canvas-export { flex: 0 0 auto; margin-top: 10px; padding: 12px 14px 9px; background: #fff; border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+.canvas-export .save-actions { position: static; display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; max-width: none; margin: 0; padding: 0; background: transparent; backdrop-filter: none; }
+.canvas-export .save-actions button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px; font-size: 13px; border-radius: 11px; }
+.canvas-export .save-actions .secondary-save { border-color: var(--border); background: #faf8fd; }
+.canvas-export .save-actions span { font-size: 18px; }
+.export-shortcuts { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; margin-top: 7px; }
+.export-shortcuts button { min-height: 32px; padding: 3px 0; background: transparent; color: var(--lavender-dark); font-size: 11px; font-weight: 650; }
+.export-shortcuts button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.export-shortcuts button:disabled { opacity: .45; cursor: default; text-decoration: none; }
+.canvas-export .draft-footnote { margin: 4px 0 0; font-size: 10px; }
+.export-settings-dialog { position: fixed; width: min(94vw,440px); padding: 24px; border: 1px solid var(--border); border-radius: 20px; color: var(--ink); background: #fff; box-shadow: 0 24px 70px rgba(55,43,70,.24); }
+.export-settings-dialog::backdrop { background: rgba(41,34,49,.46); }
+.export-settings-dialog .icon-close { position: absolute; top: 10px; right: 10px; }
+.export-settings-dialog h2 { margin: 8px 0 18px; font-size: 22px; }
+.export-settings-dialog .export-watermark { margin: 0 0 18px; padding: 0; border: 0; box-shadow: none; }
+.export-settings-dialog > .primary-button { min-height: 44px; font-size: 14px; }
+.workspace-materials .summary-grid { margin: 12px 0; gap: 6px; }
+.workspace-materials .stats-title { align-items: center; }
+.workspace-materials .stats-title .eyebrow { display: none; }
+.workspace-materials .stats-title h2 { font-size: 17px; }
+.workspace-materials .summary-grid div { padding: 9px 10px; }
+.workspace-materials .summary-grid strong { font-size: 14px; }
+.workspace-materials .replace-hint { padding: 8px 10px; font-size: 11px; }
+.workspace-materials .color-row { min-height: 36px; }
+.workspace-materials .color-list { gap: 2px; }
+.workspace-materials .list-actions { gap: 6px; margin-top: 8px; }
+.workspace-materials .list-actions button { min-height: 38px; padding: 6px 9px; font-size: 11px; }
+.workspace-materials .color-list-actions button { font-size: 11px; }
+.workspace-materials .minor-merge { display: block; margin-top: 10px; padding: 10px; }
+.compact-section > summary { cursor: pointer; font-size: 12px; font-weight: 700; }
+.compact-section[open] > summary { margin-bottom: 12px; }
+.compact-section > small { display: block; margin: 8px 0; }
+.compact-section > button { width: 100%; font-size: 12px; }
+.workspace-materials .pattern-crop-bar { gap: 6px; margin-top: 10px; padding: 12px; }
+.workspace-materials .pattern-crop-bar strong { font-size: 12px; }
+.workspace-materials .pattern-crop-bar span { font-size: 10px; }
+.workspace-materials .pattern-crop-bar button { min-height: 36px; padding: 0 10px; font-size: 11px; }
+.workspace-materials .history-card { margin-top: 10px; padding: 10px 12px; }
+.workspace-materials .history-card summary strong { font-size: 12px; }
+
+@media (min-width: 1180px) {
+  /* Flex sizing accounts for wrapped toolbars and keeps the export bar on screen. */
+  .editor-active .hero { min-height: 52px; padding-top: 8px; padding-bottom: 8px; }
+  .editor-active .brand-lockup h1 { font-size: 17px; }
+  .editor-active .brand-lockup p { display: none; }
+  .editor-active .bead-logo { width: 34px; height: 34px; grid-template-columns: repeat(3,6px); gap: 3px; border-radius: 10px; }
+  .editor-active .bead-logo i { width: 6px; height: 6px; }
+  .editor-active .header-actions button { min-height: 34px; font-size: 12px; }
+  .editor-active .page-shell { padding-bottom: 16px; }
+  .workspace-settings, .workspace-materials { max-height: calc(100dvh - 151px); }
+  .workspace-canvas { display: flex; flex-direction: column; height: calc(100dvh - 151px); min-height: 500px; }
+  .workspace-canvas > :not(.preview-shell) { flex-shrink: 0; }
+  .workspace-canvas .result-heading { margin-bottom: 9px; }
+  .workspace-canvas .result-heading .eyebrow { display: none; }
+  .workspace-canvas .result-heading h2 { font-size: 20px; }
+  .workspace-canvas .success-sticker { width: 38px; height: 38px; font-size: 24px; }
+  .workspace-canvas .canvas-actions { margin-bottom: 8px; }
+  .workspace-canvas .canvas-actions button { min-height: 36px; }
+  .workspace-canvas .paint-toolbar button { min-height: 36px; }
+  .workspace-canvas .paint-tool-hint { margin: 3px 0 7px; }
+  .workspace-canvas .mode-switch { flex-shrink: 0; width: 100%; margin: 0 0 9px; }
+  .workspace-canvas .mode-switch button { min-height: 36px; }
+  .workspace-canvas .preview-shell { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 150px; }
+  .workspace-canvas .result-stage { flex: 1 1 auto; height: auto; min-height: 0; }
+  .workspace-canvas .gesture-hint, .workspace-canvas .multi-select-bar { flex-shrink: 0; }
+  .workspace-materials .color-list { max-height: clamp(120px,calc(100dvh - 670px),300px); overflow-y: auto; scrollbar-width: thin; overscroll-behavior: contain; }
+}
+@media (min-width: 1180px) and (max-height: 800px) {
+  .workspace-canvas .result-heading p, .workspace-canvas .success-sticker, .workspace-canvas .paint-tool-hint { display: none; }
+  .workspace-canvas .result-heading h2 { font-size: 16px; }
+  .workspace-canvas .gesture-hint { padding: 5px 8px; }
+  .canvas-export .draft-footnote { display: none; }
+}
+@media (max-width: 759px) {
+  .canvas-export { padding: 10px; }
+  .canvas-export .save-actions { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+  .canvas-export #savePattern { grid-column: 1/-1; }
+  .canvas-export .save-actions button { min-height: 44px; font-size: 12px; }
+  .export-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 8px; }
+  .export-shortcuts button { min-height: 38px; }
+}

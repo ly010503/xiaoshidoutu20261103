@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.npm-cache/
+.playwright-cli/
+output/
+vite-*.log
+.wrangler/
+
+.vercel
+.browser-profiles/
+.sites/
+.skill-validator-pyyaml/
+workflow-output/
+
+.vercel
+.env*
+
+# Local assistant state and private test images
+.claude/
+.openai/
+testphoto/

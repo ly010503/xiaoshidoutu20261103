@@ -1,0 +1,15 @@
+.git
+.env*
+.vercel
+.claude
+.sites
+.skill-validator-pyyaml
+.playwright-cli
+.wrangler
+.npm-cache
+dist
+node_modules
+skills
+testphoto
+tests
+workflow-output

@@ -1,0 +1,39 @@
+:root {
+  --bg: #0e1014;
+  --surface-0: #11141a;
+  --surface-1: #171a21;
+  --surface-2: #1d212a;
+  --surface-3: #242936;
+  --border: #2b303b;
+  --border-strong: #383f4c;
+  --text: #eef0f6;
+  --text-2: #afb5c2;
+  --text-3: #747c8c;
+  --accent: #6657e8;
+  --accent-2: #7c6cff;
+  --accent-soft: rgba(111, 94, 245, .16);
+  --cyan: #5ac8db;
+  --danger: #e55e65;
+  --guide: #d65454;
+  --success: #46b98a;
+  --topbar-h: 58px;
+  --status-h: 62px;
+  --left-w: 318px;
+  --right-w: 390px;
+  --radius: 6px;
+  --font: Inter, "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+html[data-theme="light"] {
+  --bg: #e7e9ef;
+  --surface-0: #f2f3f7;
+  --surface-1: #ffffff;
+  --surface-2: #f5f6f9;
+  --surface-3: #eaecf2;
+  --border: #d5d9e2;
+  --border-strong: #c4c9d4;
+  --text: #20232b;
+  --text-2: #5c6370;
+  --text-3: #858c98;
+  --accent-soft: rgba(102, 87, 232, .1);
+}

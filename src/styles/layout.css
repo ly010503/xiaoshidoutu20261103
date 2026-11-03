@@ -1,0 +1,43 @@
+#app { height: 100vh; display: grid; grid-template-rows: var(--topbar-h) minmax(0, 1fr) var(--status-h); }
+.topbar { display: flex; align-items: center; justify-content: space-between; background: #101218; border-bottom: 1px solid var(--border); padding: 0 14px 0 16px; z-index: 10; }
+html[data-theme="light"] .topbar { background: #fff; }
+.brand, .top-actions, .status-metrics, .export-actions { display: flex; align-items: center; }
+.brand { gap: 8px; white-space: nowrap; }
+.brand-name { font-size: 16px; font-weight: 680; letter-spacing: .2px; }
+.version { color: var(--text-2); font-size: 12px; }
+.badge { color: #b9b1ff; background: var(--accent-soft); border: 1px solid rgba(124,108,255,.3); font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 3px; letter-spacing: .7px; }
+.brand-mark { display: grid; grid-template-columns: repeat(3, 4px); gap: 2px; padding: 5px; border: 1px solid var(--border-strong); border-radius: 5px; }
+.brand-mark i { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-2); }
+.brand-mark i:nth-child(3n+2) { background: var(--cyan); }.brand-mark i:nth-child(3n) { background: #f2a34c; }
+.top-actions { gap: 6px; }.top-actions button { height: 34px; padding: 0 12px; }
+.primary-btn { color: #fff; background: var(--accent); border-color: var(--accent-2); font-weight: 600; }
+.primary-btn:hover { background: #7364ed; }
+.ghost-btn, .icon-btn { background: var(--surface-1); }
+.icon-btn { width: 34px; padding: 0 !important; }
+
+.workspace { display: grid; min-height: 0; grid-template-columns: var(--left-w) minmax(480px, 1fr) var(--right-w); gap: 6px; padding: 6px; background: var(--bg); }
+.left-panel, .right-panel, .center-panel { min-height: 0; background: var(--surface-0); border: 1px solid var(--border); }
+.panel-scroll { overflow-y: auto; overflow-x: hidden; }
+.left-panel { border-radius: var(--radius); }
+.right-panel { border-radius: var(--radius); }
+.center-panel { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; border-radius: var(--radius); overflow: hidden; }
+
+.tool-section, .right-section { padding: 13px 14px 15px; border-bottom: 1px solid var(--border); }
+.tool-section:last-child, .right-section:last-child { border-bottom: 0; }
+.tool-section h2, .right-title h2 { margin: 0 0 11px; font-size: 13px; font-weight: 650; }
+.tool-section h2 > span { display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 6px; background: var(--accent); border-radius: 50%; color: #fff; font-size: 10px; }
+.preview-header { padding: 10px 12px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+.section-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 9px; }
+.section-title h1 { font-size: 13px; margin: 0; }.section-title span, .right-title span { color: var(--text-3); font-size: 11px; }
+.preview-toolbar { min-height: 47px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 12px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+.canvas-stage { min-height: 0; position: relative; overflow: hidden; background-color: #0b0d11; background-image: linear-gradient(#161920 1px, transparent 1px), linear-gradient(90deg,#161920 1px, transparent 1px); background-size: 20px 20px; cursor: grab; }
+.canvas-stage.dragging { cursor: grabbing; }
+#patternCanvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.canvas-footer { display: flex; justify-content: space-between; align-items: center; min-height: 36px; gap: 12px; padding: 6px 12px; color: var(--text-3); background: var(--surface-1); border-top: 1px solid var(--border); font-size: 11px; }
+.display-toggles { display: flex; gap: 10px; }.display-toggles label { white-space: nowrap; }
+.right-title { display: flex; align-items: baseline; justify-content: space-between; }
+.previews-section { padding-bottom: 12px; }.stats-section { display: flex; flex-direction: column; min-height: 330px; }
+.statusbar { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 12px; background: var(--surface-1); border-top: 1px solid var(--border); z-index: 8; }
+.status-metrics { min-width: 0; gap: 17px; overflow-x: auto; white-space: nowrap; color: var(--text-2); font-size: 11px; }
+.status-metrics b { color: var(--text); }.status-metrics select { padding: 4px 24px 4px 7px; }
+.export-actions { flex: 0 0 auto; gap: 6px; }.export-actions > span { color: var(--text-2); font-size: 11px; margin-right: 3px; }.export-actions button { height: 34px; padding: 0 13px; }

@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F8F4EC" />
+    <meta name="description" content="在浏览器本地把喜欢的图片变成清晰、可照着制作的拼豆图纸。" />
+    <title>拼豆图纸生成器</title>
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body data-page="home">
+    <header class="hero">
+      <div class="hero-decor decor-left" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <a class="brand-lockup" href="/" aria-label="拼豆图纸生成器首页">
+        <div class="bead-logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div><h1>拼豆图纸生成器</h1><p>把喜欢的图片变成可以照着制作的拼豆图纸</p></div>
+      </a>
+      <div class="header-actions" aria-label="工程文件">
+        <span id="draftStatus" role="status">图片在本地处理</span>
+        <button id="retryDraft" type="button" hidden>重试保存</button>
+        <button id="openProjectButton" type="button">打开工程</button>
+        <button id="saveProjectButton" type="button" disabled>保存工程</button>
+        <input id="projectFileInput" type="file" accept=".perlerproj,application/json,application/gzip" hidden />
+      </div>
+    </header>
+    <nav class="primary-navigation" aria-label="主导航">
+      <div class="navigation-inner">
+        <a href="/" data-page-link="home" aria-current="page">首页</a>
+        <a href="/photo" data-page-link="photo">图片转图纸</a>
+        <a href="/recover" data-page-link="recover">图纸识别</a>
+        <a href="/text" data-page-link="text">文字转图纸</a>
+        <a href="/link" data-page-link="link">链接导入</a>
+        <a href="/library" data-page-link="library">我的图纸</a>
+        <a href="/editor" data-page-link="editor" class="resume-editor" hidden>当前图纸 <span aria-hidden="true">↗</span></a>
+      </div>
+    </nav>
+
+    <main class="page-shell">
+      <section id="introSection" class="intro-section">
+        <span class="eyebrow">把喜欢，拼成一颗颗小美好</span>
+        <h2>把喜欢，拼成自己的作品</h2>
+        <p>从一张图片、一句文字，或一份旧图纸开始。</p>
+        <div class="intro-tags"><span>本地处理</span><span>MARD 221 色</span><span>高清图纸与用豆清单</span></div>
+        <div class="home-actions"><a class="primary-button" href="/photo">开始制作 <span aria-hidden="true">→</span></a><a class="home-secondary" href="/library">打开我的图纸</a></div>
+      </section>
+      <section id="homeShowcase" class="home-showcase" aria-label="开始你的拼豆创作">
+        <div class="home-guide">
+          <span class="eyebrow">选择一种开始方式</span>
+          <h2>灵感不同，入口也不同</h2>
+          <p>选好你手边的素材，剩下的交给我们。</p>
+          <div class="creation-entries">
+            <a href="/photo"><span class="entry-icon lavender" aria-hidden="true">▧</span><span><strong>把图片变成图纸</strong><small>照片、插画、宠物头像</small></span><b aria-hidden="true">↗</b></a>
+            <a href="/recover"><span class="entry-icon mint" aria-hidden="true">▦</span><span><strong>继续一份现成图纸</strong><small>识别网格截图，还原后继续修改</small></span><b aria-hidden="true">↗</b></a>
+            <a href="/text"><span class="entry-icon pink" aria-hidden="true">字</span><span><strong>拼一句想说的话</strong><small>名字牌、生日祝福、可爱云朵字</small></span><b aria-hidden="true">↗</b></a>
+            <button id="openBlankCanvas" type="button"><span class="entry-icon yellow" aria-hidden="true">▢</span><span><strong>从空白画布开始画</strong><small>选好格数，用画笔一颗颗点出自己的像素画</small></span><b aria-hidden="true">↗</b></button>
+          </div>
+          <p class="home-local-note">原图与编辑自动保存在当前浏览器，随时回来继续。</p>
+        </div>
+        <div id="homeExample"></div>
+      </section>
+      <section id="homeStrengths" class="home-strengths" aria-labelledby="homeStrengthsTitle">
+        <span class="eyebrow">别处少见的贴心细节</span>
+        <h2 id="homeStrengthsTitle">从找图到摆豆，少走几步弯路</h2>
+        <ul>
+          <li><b aria-hidden="true">⇢</b><strong>粘贴链接就能导入</strong><small>抖音、小红书图文分享链接直接读图，不用先存相册再上传。</small></li>
+          <li><b aria-hidden="true">◎</b><strong>导出图自带防盗水印</strong><small>醒目的“原创作品 · 禁止盗用”标注，还可开铺满斜向水印，晒图不怕被搬。</small></li>
+          <li><b aria-hidden="true">▤</b><strong>分色定位图一键打包</strong><small>每种颜色单独一张，正向和镜像各一套，按颜色一轮轮摆豆不找错格。</small></li>
+          <li><b aria-hidden="true">✎</b><strong>卡通线稿更干净</strong><small>卡通 / Q版模式自动加一格黑色外轮廓，线稿只取中间一格，不糊成一团。</small></li>
+          <li><b aria-hidden="true">⌂</b><strong>图片不离开你的设备</strong><small>识别、取色、生成全部在浏览器里完成，草稿只存在本机。</small></li>
+        </ul>
+      </section>
+      <section id="draftCard" class="draft-card" aria-label="上次的本机草稿" hidden>
+        <img id="draftThumbnail" alt="上次草稿缩略图" />
+        <div><span class="eyebrow">上次还没拼完的喜欢</span><strong id="draftName"></strong><p id="draftMeta"></p><button id="draftCount" class="text-link" type="button">我的图纸</button></div>
+        <button id="restoreDraft" class="soft-button" type="button">继续制作</button>
+        <small>仅保存在当前浏览器；跨电脑请保存工程文件。清除网站数据会移除草稿。</small>
+      </section>
+
+      <section id="creationHeading" class="creation-heading" hidden>
+        <span id="creationEyebrow" class="eyebrow"></span><h2 id="creationTitle" tabindex="-1"></h2><p id="creationDescription"></p>
+      </section>
+      <div id="editorResume" class="editor-resume" hidden><span>当前图纸已保留，可以随时返回继续编辑。</span><a href="/editor">返回当前图纸 →</a></div>
+      <section class="creator-layout" aria-label="制作拼豆图纸" hidden>
+        <div id="setupColumn" class="setup-column">
+          <article class="card upload-card">
+            <div data-source-panel="photo">
+            <div class="step-heading"><span class="step-number">1</span><div><h2>上传一张你喜欢的图片</h2><p>照片、动漫、宠物、头像都可以</p></div></div>
+            <div id="uploadZone" class="upload-zone" tabindex="0" role="button" aria-label="上传图片">
+              <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+              <div id="uploadPrompt" class="upload-prompt">
+                <div class="upload-sticker" aria-hidden="true">＋</div>
+                <strong>从相册选择图片</strong><span>支持 JPG / PNG / WebP</span>
+              </div>
+              <div id="uploadedSummary" class="uploaded-summary" hidden>
+                <img id="uploadThumbnail" alt="已上传图片预览" />
+                <div><strong id="uploadedName"></strong><span id="uploadedMeta"></span></div>
+              </div>
+            </div>
+            </div>
+            <div class="pattern-upload-entry" data-source-panel="recover" hidden>
+              <div><span class="source-upload-symbol" aria-hidden="true">▦</span><strong>上传网格图纸截图</strong><span>自动识别横纵格数、格子底色和用豆图例</span></div>
+              <button id="uploadPatternImage" type="button">▦ 上传图纸并识别</button>
+              <input id="patternFileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+            </div>
+            <div data-source-panel="link" hidden>
+            <div class="step-heading"><span class="step-number blue" aria-hidden="true">↗</span><div><h2>粘贴作品分享链接</h2><p>支持抖音图文和小红书公开笔记</p></div></div>
+            <form id="linkImportForm" class="link-import-form">
+              <textarea id="linkImportInput" rows="3" maxlength="2000" placeholder="支持完整分享文案、抖音图文链接或小红书图文笔记链接" aria-label="抖音或小红书作品链接"></textarea>
+              <button id="resolveLinkButton" type="submit">读取链接图片</button>
+            </form>
+            <p id="linkImportHint" class="link-import-hint">仅支持公开图文作品；视频作品暂不支持。</p>
+            </div>
+            <p class="privacy-note"><span aria-hidden="true">♡</span> 相册图片不上传服务器；草稿自动保存在当前浏览器。链接图片仅临时转发。</p>
+          </article>
+
+          <div id="settingsArea" hidden>
+            <details class="card edit-card settings-section" open>
+              <summary class="step-heading"><span class="step-number mint">2</span><div><h2>简单编辑一下</h2><p>裁剪、旋转与重新上传</p></div></summary>
+              <div class="edit-actions">
+                <button id="cropButton"><span>⌗</span>裁剪原图</button>
+                <button data-transform="rotateLeft"><span>↶</span>左旋</button>
+                <button data-transform="rotateRight"><span>↷</span>右旋</button>
+                <button data-transform="flipH"><span>↔</span>翻转</button>
+                <button data-transform="reset"><span>↺</span>恢复</button>
+              </div>
+              <div class="pattern-recovery-card">
+                <div><strong>上传的是现成网格图纸？</strong><span id="patternRecoveryStatus">自动数格子，并读取每一格的底色</span></div>
+                <button id="detectPatternGrid" type="button">识别现成图纸</button>
+              </div>
+              <button id="replaceImage" class="text-button">重新上传</button>
+            </details>
+
+            <details class="card choice-card settings-section" open>
+              <summary class="step-heading"><span class="step-number yellow">3</span><div><h2>想做多大的图纸？</h2><p id="sizeSettingSummary">尺寸越大，细节越丰富</p></div></summary>
+              <div id="sizeCards" class="size-cards" role="radiogroup" aria-label="选择图纸尺寸"></div>
+            </details>
+
+            <details class="card choice-card settings-section" open>
+              <summary class="step-heading"><span class="step-number pink">4</span><div><h2>最多允许多少种颜色？</h2><p id="colorSettingSummary">系统会自动识别实际颜色，你只需设置上限</p></div></summary>
+              <div id="colorCards" class="color-cards" role="radiogroup" aria-label="选择最大颜色数量上限"></div>
+              <p class="auto-color-note">自动识别不会强行用满颜色，最终数量会显示在用豆清单中。</p>
+              <div class="owned-palette-card">
+                <label><input id="useOwnedPalette" type="checkbox" /> 仅使用我已有的色号</label>
+                <p id="ownedPaletteSummary">未限制色号，使用完整 MARD 色库</p>
+                <button id="openOwnedPalette" type="button" class="soft-button">管理我的色号</button>
+                <small>颜色数量上限与可用色号分别设置；更改后重新生成生效。</small>
+              </div>
+              <p class="palette-note"><strong>MARD 标准 221 色</strong> · 屏幕颜色为近似值，购豆请以色号和实体色卡为准。</p>
+            </details>
+
+            <details class="card choice-card settings-section" open>
+              <summary class="step-heading"><span class="step-number blue">5</span><div><h2>这是什么类型的图片？</h2><p id="styleSettingSummary">按图片类型套用对应的取色方式</p></div></summary>
+              <div id="modeRecommendation" class="mode-recommendation" hidden>
+                <div><span>智能推荐</span><strong id="modeRecommendationText"></strong><small id="modeRecommendationReason"></small></div>
+                <button id="applyModeRecommendation" type="button">一键套用</button>
+              </div>
+              <div id="colorStyleCards" class="style-cards" role="radiogroup" aria-label="选择图片类型">
+                <button class="style-card" data-color-style="natural" role="radio" aria-checked="false">
+                  <span class="style-dots natural-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <strong>照片</strong><small>接近原图，颜色柔和、过渡自然</small><b class="style-fit">真人、宠物、风景照</b>
+                </button>
+                <button class="style-card active" data-color-style="vivid" role="radio" aria-checked="true">
+                  <span class="style-dots vivid-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <strong>插画 / 海报</strong><em>推荐</em><small>加强饱和度，颜色更浓郁、更有冲击力</small><b class="style-fit">手绘插画、海报、表情包</b>
+                </button>
+                <button class="style-card" data-color-style="ordered" role="radio" aria-checked="false">
+                  <span class="style-dots ordered-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <strong>卡通 / Q版</strong><small>连续色块、H7 黑色外轮廓，轮廓外自动留白，更方便拼制</small><b class="style-fit">有黑色线稿的卡通、Q版头像</b>
+                </button>
+                <button class="style-card direct-style-card" data-color-style="direct" role="radio" aria-checked="false">
+                  <span class="style-dots direct-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <strong>像素画 / Logo</strong><small>识别出像素画时一个像素块一颗豆，原样还原；不强化轮廓，白色完整保留</small><b class="style-fit">像素画、游戏角色、Logo、图标</b>
+                </button>
+              </div>
+            </details>
+
+            <p id="dirtyNotice" class="dirty-notice" hidden>设置已修改，请重新生成图纸</p>
+            <button id="generateButton" class="primary-button"><span aria-hidden="true">✦</span> 生成我的拼豆图纸</button>
+          </div>
+        </div>
+
+        <aside id="sourceHome" class="preview-column">
+          <article id="sourceGuide" class="card source-guide">
+            <span class="eyebrow">从素材到作品</span><h2>简单几步，就能开始拼</h2>
+            <ol id="sourceGuideSteps"></ol>
+            <p>生成后可逐格改色、查看用豆清单，导出高清图纸或 1:1 打印 PDF。</p>
+          </article>
+          <article id="welcomeCard" class="card welcome-card">
+            <span class="eyebrow">先看看，会变成什么样</span>
+            <h2>一个 Q版人物，两种可爱</h2>
+            <div class="example-comparison">
+              <figure><img id="exampleImage" src="./assets/example-chibi.jpg" alt="戴发带、拿相机的金发 Q版人物原图" /><figcaption>喜欢的原图</figcaption></figure>
+              <figure><canvas id="examplePattern" aria-label="Q版人物生成的拼豆图纸示例"></canvas><figcaption>带色号的制作图</figcaption></figure>
+            </div>
+            <p id="exampleSummary">同一张图，自动配色、数豆、标色号。</p>
+            <button id="tryExample" type="button" class="soft-button">用这张图试做 →</button>
+            <div class="feature-notes"><span>旧图纸也能恢复编辑</span><span>分色定位图与镜像导出</span></div>
+          </article>
+          <article id="sourceCard" class="card source-card" hidden>
+            <div class="card-title-row"><div><span class="eyebrow">图片预览</span><h2>这张图片会变成拼豆图</h2></div><span id="cropBadge" class="mini-badge" hidden>已裁剪</span></div>
+            <div class="source-frame"><canvas id="sourcePreview" aria-label="编辑后的图片预览"></canvas></div>
+            <p>建议保留清晰的主体，复杂背景会自动简化成拼豆色块。</p>
+          </article>
+        </aside>
+      </section>
+
+      <section id="progressSection" class="progress-card" hidden aria-live="polite">
+        <div class="progress-beads" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <strong id="progressLabel">正在分析图片……</strong>
+        <div class="progress-track"><i id="progressFill"></i></div>
+      </section>
+
+      <section id="resultSection" class="result-section" data-panel="canvas" aria-label="图纸编辑工作区" hidden>
+        <nav class="workspace-tabs" aria-label="工作区面板">
+          <button type="button" data-workspace-panel="settings" aria-pressed="false">调整设置</button>
+          <button type="button" data-workspace-panel="canvas" aria-pressed="true">图纸编辑</button>
+          <button type="button" data-workspace-panel="materials" aria-pressed="false">用豆清单</button>
+        </nav>
+        <aside id="workspaceSettings" class="workspace-settings" aria-label="图纸设置"><div id="workspaceSource"></div></aside>
+        <div class="workspace-canvas">
+        <div class="result-heading"><span class="success-sticker">✓</span><div><span class="eyebrow">可以开始精修啦</span><h2 id="editorPageTitle" tabindex="-1">你的拼豆图纸</h2><p>调整设置、修改单格，随时查看用豆与导出</p></div></div>
+        <div class="canvas-actions" aria-label="画布操作">
+          <button id="undoEdit" type="button" disabled title="撤销 Ctrl+Z">↶ 撤销</button>
+          <button id="redoEdit" type="button" disabled title="重做 Ctrl+Shift+Z / Ctrl+Y">↷ 重做</button>
+          <span></span>
+          <button id="zoomOut" type="button" aria-label="缩小图纸">−</button>
+          <button id="fitCanvas" type="button">适应画布</button>
+          <button id="zoomIn" type="button" aria-label="放大图纸">＋</button>
+        </div>
+        <div class="view-toggles" role="group" aria-label="制作图显示方式">
+          <span>显示</span>
+          <button type="button" data-view-option="grid" aria-pressed="true">网格</button>
+          <button type="button" data-view-option="codes" aria-pressed="true">色号</button>
+          <button type="button" data-view-option="round" aria-pressed="false">圆豆</button>
+          <button type="button" data-view-option="mirror" aria-pressed="false">镜像查看</button>
+        </div>
+        <div class="paint-toolbar" role="group" aria-label="图纸编辑工具">
+          <button type="button" data-edit-tool="select" aria-pressed="true">选格换色</button>
+          <button type="button" data-edit-tool="move" aria-pressed="false">移动</button>
+          <button type="button" data-edit-tool="brush" aria-pressed="false">画笔</button>
+          <button type="button" data-edit-tool="eraser" aria-pressed="false">橡皮擦</button>
+          <button type="button" data-edit-tool="fill" aria-pressed="false">区域填色</button>
+          <button type="button" data-edit-tool="pick" aria-pressed="false" title="快捷键 I">吸管取色</button>
+          <button type="button" data-edit-tool="box" aria-pressed="false" title="快捷键 X">框选删除</button>
+          <button id="chooseBrushColor" type="button"><i id="brushColorSwatch" aria-hidden="true"></i><span id="brushColorLabel">画笔色 H7</span></button>
+        </div>
+        <p id="paintToolHint" class="paint-tool-hint" role="status">制作图中点击单格换色；拖动可平移。</p>
+        <div class="mode-switch" role="tablist" aria-label="图纸模式">
+          <button class="active" data-mode="effect" role="tab" aria-selected="true">效果图</button>
+          <button data-mode="pattern" role="tab" aria-selected="false">制作图</button>
+        </div>
+        <div class="preview-shell">
+          <div id="resultStage" class="result-stage">
+            <canvas id="resultCanvas" aria-label="拼豆图纸预览"></canvas>
+            <button id="fullscreenButton" class="fullscreen-button" aria-label="全屏查看">⛶ 全屏</button>
+          </div>
+          <div id="multiSelectBar" class="multi-select-bar" hidden aria-live="polite">
+            <span>已选择 <strong id="selectedCellCount">0</strong> 格</span>
+            <div>
+              <button id="clearSelectedCells" type="button">取消选择</button>
+              <button id="deleteSelectedCells" type="button">删除</button>
+              <button id="replaceSelectedCells" type="button">批量换色</button>
+            </div>
+          </div>
+          <p class="gesture-hint">制作图中轻点换色 · 拖动平移，双指或滚轮缩放 · Ctrl 多选 / Shift 框选</p>
+        </div>
+        <section class="canvas-export" aria-label="导出与保存">
+          <div class="save-actions" aria-label="常用导出">
+            <button id="savePattern" class="primary-button" type="button"><span aria-hidden="true">⇩</span>高清制作图</button>
+            <button id="saveEffect" class="secondary-save" type="button"><span aria-hidden="true">▧</span>高清效果图</button>
+            <button id="openPrintPdf" class="secondary-save" type="button" title="按 1:1 实物大小打印"><span aria-hidden="true">⎙</span>打印 PDF</button>
+          </div>
+          <div class="export-shortcuts">
+            <button id="saveMirroredPattern" type="button">⇆ 镜像制作图</button>
+            <button id="saveProjectResultButton" type="button">⌁ 保存工程</button>
+            <button id="exportAllHighlightedColors" type="button" disabled>全部分色图 ZIP</button>
+            <button id="openExportSettings" type="button" aria-expanded="false" aria-controls="exportSettingsDialog">水印设置</button>
+          </div>
+          <p class="draft-footnote">草稿自动保存在本机 · 换设备前请保存工程</p>
+        </section>
+        </div>
+        <aside class="workspace-materials" aria-label="用豆清单与编辑工具">
+        <article class="card stats-card">
+          <div class="stats-title"><div><span class="eyebrow">本次图纸</span><h2>用豆清单</h2></div><span id="actualColorBadge" class="actual-color-badge"></span></div>
+          <div class="summary-grid">
+            <div><span>总豆数</span><strong id="summaryTotal">0颗</strong></div>
+            <div><span>实际使用</span><strong id="summaryColors">0种颜色</strong></div>
+            <div><span>成品尺寸（2.6mm豆）</span><strong id="summaryPhysical">约0cm × 0cm</strong></div>
+          </div>
+          <p class="replace-hint">点色号定位豆子，也可以整色替换或导出单色图。</p>
+          <div id="colorList" class="color-list"></div>
+          <div class="list-actions color-list-actions">
+            <button id="toggleColors" class="soft-button" hidden>展开全部</button>
+            <button id="copyColors" class="soft-button">复制清单</button>
+          </div>
+          <div class="list-actions">
+            <button id="replaceSelectedColor" class="replace-selected-button" disabled>先点一种颜色，再整色替换</button>
+            <button id="exportHighlightedColor" class="highlight-export-button" disabled>先选择颜色，再导出定位图</button>
+          </div>
+          <details class="minor-merge compact-section">
+            <summary>合并零散色号</summary>
+            <label for="minorMergeRatio"><strong>合并零散色号</strong><span>占比低于</span><input id="minorMergeRatio" type="number" min="0.1" max="5" step="0.1" value="0.8" inputmode="decimal" /><span>%</span></label>
+            <small id="minorMergeHint">没有低于这个占比的颜色</small>
+            <button id="applyMinorMerge" type="button" class="soft-button" disabled>并入最相近的颜色</button>
+          </details>
+        </article>
+        <div class="pattern-crop-bar">
+          <div><strong>调整图纸边缘</strong><span>居中裁切或补空白格</span></div>
+          <button id="openPatternCrop" type="button">调整尺寸</button>
+        </div>
+        <details class="history-card">
+          <summary><strong>编辑记录</strong><span id="historyCount"></span></summary>
+          <p class="history-tip">点记录可在图纸上框出这一步改动的格子；“撤回到此前”会撤回这一步及之后的所有修改。</p>
+          <p id="historyEmpty" class="history-empty">还没有修改记录</p>
+          <ol id="historyList" class="history-list"></ol>
+          <p id="historyRedoNote" class="history-redo" hidden></p>
+          <button id="restoreInitialPattern" type="button" class="soft-button" disabled>恢复到刚生成的样子</button>
+        </details>
+        </aside>
+      </section>
+    </main>
+
+    <dialog id="exportSettingsDialog" class="export-settings-dialog" aria-labelledby="exportSettingsTitle">
+      <button id="closeExportSettings" class="icon-close" type="button" aria-label="关闭水印设置">×</button>
+      <span class="eyebrow">导出偏好</span>
+      <h2 id="exportSettingsTitle">水印设置</h2>
+      <div id="exportWatermarkCard" class="export-watermark">
+          <label class="watermark-toggle" for="tiledWatermarkEnabled">
+            <span><strong>铺满防盗水印</strong><small>保存时添加低透明度斜向水印，不遮挡色号</small></span>
+            <input id="tiledWatermarkEnabled" type="checkbox" checked />
+          </label>
+          <label class="watermark-text-field" for="tiledWatermarkText">
+            <span>水印文案</span>
+            <input id="tiledWatermarkText" type="text" value="@小红薯 小石豆图" maxlength="40" autocomplete="off" />
+          </label>
+      </div>
+      <button id="doneExportSettings" class="primary-button" type="button">完成</button>
+    </dialog>
+
+    <dialog id="cropDialog" class="crop-dialog">
+      <div class="crop-header"><div><span class="eyebrow">调整画面</span><h2>裁剪图片</h2></div><button id="cancelCrop" class="icon-close" aria-label="取消裁剪">×</button></div>
+      <div class="crop-workspace"><img id="cropImage" alt="待裁剪图片" /></div>
+      <div class="crop-ratios" aria-label="裁剪比例"><button class="active" data-ratio="free">自由</button><button data-ratio="square">正方形</button><button data-ratio="portrait">竖版</button><button data-ratio="landscape">横版</button><button data-ratio="pattern">图纸比例</button></div>
+      <div class="crop-footer"><p>拖动图片或裁剪框，双指可以缩放</p><button id="confirmCrop" class="primary-button">完成裁剪</button></div>
+    </dialog>
+
+    <dialog id="customSizeDialog" class="simple-dialog">
+      <button class="icon-close" data-close-dialog aria-label="关闭">×</button><span class="eyebrow">自定义图纸</span><h2>输入格子数量</h2>
+      <div class="custom-inputs"><label>宽度<input id="customWidth" type="number" min="10" max="200" value="70" inputmode="numeric" /></label><span>×</span><label>高度<input id="customHeight" type="number" min="10" max="300" value="104" inputmode="numeric" /></label></div>
+      <p id="customTotal">总计 7,280颗</p><button id="confirmCustomSize" class="primary-button">使用这个尺寸</button>
+    </dialog>
+
+    <dialog id="blankCanvasDialog" class="simple-dialog blank-canvas-dialog">
+      <button id="closeBlankCanvas" class="icon-close" type="button" aria-label="关闭空白画布">×</button>
+      <span class="eyebrow">空白画布</span>
+      <h2>画布要多大？</h2>
+      <p class="pattern-crop-intro">29 格是一块小拼板，52 格是一块大拼板。画好后同样可以导出图纸、打印 PDF 和统计用豆。</p>
+      <div class="blank-canvas-presets" role="group" aria-label="常用画布尺寸">
+        <button type="button" data-blank-size="29x29" aria-pressed="false"><strong>29 × 29</strong><small>小拼板</small></button>
+        <button type="button" data-blank-size="52x52" aria-pressed="true"><strong>52 × 52</strong><small>大拼板</small></button>
+        <button type="button" data-blank-size="58x58" aria-pressed="false"><strong>58 × 58</strong><small>2×2 小拼板</small></button>
+        <button type="button" data-blank-size="104x104" aria-pressed="false"><strong>104 × 104</strong><small>2×2 大拼板</small></button>
+      </div>
+      <div class="custom-inputs">
+        <label>宽度<input id="blankCanvasWidth" type="number" min="10" max="200" value="52" inputmode="numeric" /></label>
+        <span>×</span>
+        <label>高度<input id="blankCanvasHeight" type="number" min="10" max="300" value="52" inputmode="numeric" /></label>
+      </div>
+      <p id="blankCanvasSummary" class="pattern-crop-summary" aria-live="polite"></p>
+      <button id="confirmBlankCanvas" class="primary-button" type="button">新建空白画布</button>
+    </dialog>
+
+    <dialog id="patternCropDialog" class="simple-dialog pattern-crop-dialog">
+      <button id="cancelPatternCrop" class="icon-close" type="button" aria-label="关闭图纸尺寸调整">×</button>
+      <span class="eyebrow">成品图纸尺寸</span>
+      <h2>裁切或扩展图纸</h2>
+      <p class="pattern-crop-intro">尺寸变小时居中裁切，尺寸变大时在四周补纯白留白；已有颜色和色号会原样保留。</p>
+      <div class="pattern-crop-current"><span>当前尺寸</span><strong id="patternCropCurrent">0 × 0格</strong></div>
+      <div class="custom-inputs">
+        <label>目标宽度<input id="patternCropWidth" type="number" min="10" max="200" inputmode="numeric" /></label>
+        <span>×</span>
+        <label>目标高度<input id="patternCropHeight" type="number" min="10" max="300" inputmode="numeric" /></label>
+      </div>
+      <p id="patternCropSummary" class="pattern-crop-summary" aria-live="polite"></p>
+      <small class="pattern-crop-rule">图纸始终居中调整；遇到奇数时，左边或上边会多裁或多补一格。可用 Ctrl+Z 撤销。</small>
+      <button id="confirmPatternCrop" class="primary-button" type="button">确认调整图纸</button>
+    </dialog>
+
+    <section id="textPatternDialog" class="card feature-page text-pattern-dialog" aria-labelledby="textPageTitle" hidden>
+      <span class="eyebrow">文字转图纸</span>
+      <h2 id="textPageTitle" tabindex="-1">输入文字，拼一句心意</h2>
+      <p class="feature-page-intro">选好字体、样式和配色，实时预览你的名字牌或祝福语。</p>
+      <div class="text-pattern-layout">
+        <div class="text-pattern-controls">
+          <div class="text-templates" role="group" aria-label="一键模板"><span>一键模板</span><div id="textTemplates"></div></div>
+          <label class="text-field"><span>文字<small id="textCount">0/40</small></span><textarea id="textInput" maxlength="40" rows="2" placeholder="例如：生日快乐&#10;换行就是新的一行">生日快乐</textarea></label>
+          <div class="text-row">
+            <label>字体<select id="textFont"></select></label>
+            <label class="text-check"><input id="textBold" type="checkbox" checked />加粗</label>
+          </div>
+          <small id="textFontNote" class="text-font-note" aria-live="polite"></small>
+          <label class="text-range">字高 <b id="textHeightValue">16 格</b><input id="textHeight" type="range" min="8" max="60" value="16" /></label>
+          <label class="text-range">字距 <b id="textSpacingValue">1 格</b><input id="textSpacing" type="range" min="0" max="6" value="1" /></label>
+          <label class="text-range">行距 <b id="textLineSpacingValue">2 格</b><input id="textLineSpacing" type="range" min="0" max="10" value="2" /></label>
+          <div class="text-segment" role="radiogroup" aria-label="对齐方式">
+            <button type="button" data-text-align="left" aria-pressed="false">左对齐</button>
+            <button type="button" data-text-align="center" aria-pressed="true">居中</button>
+            <button type="button" data-text-align="right" aria-pressed="false">右对齐</button>
+          </div>
+          <div class="text-segment" role="radiogroup" aria-label="文字样式">
+            <button type="button" data-text-style="plain" aria-pressed="false">纯色字</button>
+            <button type="button" data-text-style="outline" aria-pressed="false">描边字</button>
+            <button type="button" data-text-style="cloud" aria-pressed="true">☁ 云朵字</button>
+            <button type="button" data-text-style="sticker" aria-pressed="false">贴纸字</button>
+            <button type="button" data-text-style="hollow" aria-pressed="false">空心字</button>
+            <button type="button" data-text-style="rainbow" aria-pressed="false">彩虹描边</button>
+          </div>
+          <small id="textStyleNote" class="text-font-note" aria-live="polite"></small>
+          <div id="textSchemes" class="text-schemes" role="radiogroup" aria-label="配色方案"></div>
+        </div>
+        <div class="text-pattern-preview">
+          <canvas id="textPreview" aria-label="文字图纸预览"></canvas>
+          <p id="textSummary" class="text-summary" aria-live="polite"></p>
+        </div>
+      </div>
+      <button id="createTextPattern" class="primary-button" type="button">生成文字图纸，继续编辑</button>
+    </section>
+
+    <section id="myPatternsDialog" class="card feature-page my-patterns-dialog" aria-labelledby="libraryPageTitle" hidden>
+      <span class="eyebrow">只保存在这台设备的浏览器里</span>
+      <h2 id="libraryPageTitle" tabindex="-1">我的图纸</h2>
+      <p class="my-patterns-intro">每份图纸的原图、设置和修改都会自动保存，最多保留最近 30 份。清除浏览器数据会删除它们，换电脑请用“保存工程”。</p>
+      <div id="myPatternEmpty" class="my-patterns-empty"><span aria-hidden="true">▧</span><strong>这里会收好你的每一份创作</strong><p>还没有图纸，从一张喜欢的图片开始吧。</p><a class="primary-button" href="/photo">制作第一份图纸 →</a></div>
+      <ol id="myPatternList" class="my-pattern-list"></ol>
+    </section>
+
+    <dialog id="printPdfDialog" class="simple-dialog print-pdf-dialog">
+      <button id="closePrintPdf" class="icon-close" type="button" aria-label="关闭打印设置">×</button>
+      <span class="eyebrow">1:1 实物大小</span>
+      <h2>打印 PDF 图纸</h2>
+      <p class="print-pdf-intro">每格按豆子实际直径排版，打印后可直接垫在拼板下对照摆豆；超出一张 A4 时自动分页，最后附色号图例。</p>
+      <fieldset class="print-bead-size">
+        <legend>豆子尺寸</legend>
+        <label><input type="radio" name="printBeadSize" value="2.6" checked /><span><strong>2.6 mm</strong><small>迷你豆（MARD 常用）</small></span></label>
+        <label><input type="radio" name="printBeadSize" value="5" /><span><strong>5 mm</strong><small>标准豆</small></span></label>
+      </fieldset>
+      <label class="print-mirror"><input id="printMirror" type="checkbox" /><span>打印镜像图（从背面熨烫时使用）</span></label>
+      <p id="printPdfSummary" class="print-pdf-summary" aria-live="polite"></p>
+      <small class="print-pdf-rule">打印时选择“实际大小 / 100%”，不要选“适合页面”。每页左下角有 5 cm 校准尺，打印后量一下就能确认比例。</small>
+      <button id="confirmPrintPdf" class="primary-button" type="button">生成并下载 PDF</button>
+    </dialog>
+
+    <dialog id="patternGridDialog" class="simple-dialog pattern-grid-dialog">
+      <button id="cancelPatternGrid" class="icon-close" type="button" aria-label="关闭识别结果">×</button>
+      <span class="eyebrow">已有图纸恢复</span>
+      <h2>确认识别到的格子数量</h2>
+      <canvas id="patternGridPreview" aria-label="识别到的图纸区域预览"></canvas>
+      <p id="patternGridSummary" class="pattern-grid-summary"></p>
+      <div class="custom-inputs">
+        <label>横向格数<input id="detectedGridWidth" type="number" min="10" max="200" inputmode="numeric" /></label>
+        <span>×</span>
+        <label>纵向格数<input id="detectedGridHeight" type="number" min="10" max="300" inputmode="numeric" /></label>
+      </div>
+      <small class="pattern-grid-warning">系统会按格子底色匹配 MARD 屏幕近似色；相近色号建议生成后在制作图中复核。</small>
+      <button id="confirmPatternGrid" class="primary-button" type="button">恢复为可编辑图纸</button>
+    </dialog>
+
+    <dialog id="linkImageDialog" class="simple-dialog link-image-dialog">
+      <button id="cancelLinkImages" class="icon-close" type="button" aria-label="关闭链接图片列表">×</button>
+      <span class="eyebrow">链接读取成功</span>
+      <h2 id="linkImageTitle">选择要恢复的图纸图片</h2>
+      <p id="linkImageMeta" class="link-image-meta"></p>
+      <div id="linkImageGrid" class="link-image-grid" role="list"></div>
+      <small class="pattern-grid-warning">点击图片后会自动进入网格识别；如果它不是现成图纸，也可以关闭识别弹窗，按普通图片继续生成。</small>
+    </dialog>
+
+    <dialog id="saveProjectDialog" class="simple-dialog save-project-dialog">
+      <button id="cancelSaveProject" class="icon-close" type="button" aria-label="取消保存工程">×</button>
+      <span class="eyebrow">保存工程</span>
+      <h2>给这个工程起个名字</h2>
+      <form id="saveProjectForm">
+        <label class="project-name-field" for="projectNameInput">
+          <span>工程名称</span>
+          <input id="projectNameInput" type="text" maxlength="80" placeholder="例如：Q版头像 70×104" required autocomplete="off" />
+          <small>保存时会自动添加 .perlerproj 后缀</small>
+        </label>
+        <button id="confirmSaveProject" class="primary-button" type="submit">确认保存工程</button>
+      </form>
+    </dialog>
+
+    <dialog id="replaceColorDialog" class="replace-dialog">
+      <button id="closeReplaceColor" class="icon-close" aria-label="关闭替换颜色">×</button>
+      <span class="eyebrow">手动调整图纸</span>
+      <h2 id="replaceDialogTitle">替换颜色</h2>
+      <div class="replace-current">
+        <i id="replaceCurrentSwatch"></i>
+        <div><span id="replaceCurrentLabel">当前选中的颜色</span><strong id="replaceCurrentCode"></strong><small id="replaceCurrentMeta"></small></div>
+      </div>
+      <label class="replace-search">
+        <span>从完整221色色卡中选择</span>
+        <input id="replacementSearch" type="search" placeholder="搜索色号或颜色名称，如 C20" autocomplete="off" />
+      </label>
+      <div class="replace-target">
+        <span>准备替换为</span>
+        <strong id="replaceTargetText">请在下方选择一种颜色</strong>
+      </div>
+      <div id="replacementPalette" class="replacement-palette" role="radiogroup" aria-label="221色替换色卡"></div>
+      <div class="replace-dialog-footer">
+        <button id="confirmReplaceColor" class="primary-button" disabled>确认替换</button>
+      </div>
+    </dialog>
+
+    <dialog id="brushColorDialog" class="replace-dialog">
+      <button id="closeBrushColor" type="button" class="icon-close" aria-label="关闭画笔选色">×</button>
+      <span class="eyebrow">选好颜色，再开始画</span><h2>选择画笔颜色</h2>
+      <label class="replace-search"><span>搜索色号或名称</span><input id="brushColorSearch" type="search" placeholder="例如 H7、F5" autocomplete="off" /></label>
+      <p id="brushPaletteHint" class="paint-tool-hint"></p>
+      <div id="brushPalette" class="replacement-palette" role="radiogroup" aria-label="画笔可用颜色"></div>
+    </dialog>
+
+    <dialog id="ownedPaletteDialog" class="replace-dialog owned-palette-dialog">
+      <button id="closeOwnedPalette" type="button" class="icon-close" aria-label="关闭我的色号">×</button>
+      <span class="eyebrow">按手头的豆子来配色</span><h2>我的豆子色号</h2>
+      <div class="profile-row"><select id="ownedProfileSelect" aria-label="已保存的个人色板"><option value="">选择已保存的色板</option></select><button id="loadOwnedProfile" type="button" class="soft-button">载入</button></div>
+      <div class="owned-quick-actions"><button id="selectAllOwned" type="button">全选221色</button><button id="clearOwned" type="button">清空选择</button><button id="usePatternColors" type="button">选当前图纸用色</button></div>
+      <label class="replace-search"><span>批量录入色号，用空格或逗号分隔</span><input id="ownedCodesInput" type="text" placeholder="例如 H2 H7 F5 C20" /></label>
+      <button id="applyOwnedCodes" type="button" class="soft-button">按录入内容选择</button>
+      <label class="replace-search"><span>搜索并勾选色号</span><input id="ownedColorSearch" type="search" placeholder="搜索色号或色系" /></label>
+      <p id="ownedSelectedCount" class="paint-tool-hint" aria-live="polite">已选择 0 色</p>
+      <div id="ownedPaletteGrid" class="replacement-palette" role="group" aria-label="我已有的MARD色号"></div>
+      <div class="profile-row"><input id="ownedProfileName" type="text" maxlength="40" placeholder="色板名称，例如我的常用豆" aria-label="个人色板名称" /><button id="saveOwnedProfile" type="button" class="soft-button">保存色板</button></div>
+      <div class="replace-dialog-footer"><button id="confirmOwnedPalette" type="button" class="primary-button">使用这些色号</button></div>
+    </dialog>
+    <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

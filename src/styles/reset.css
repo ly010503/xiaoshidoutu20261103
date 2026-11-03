@@ -1,0 +1,15 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; min-width: 320px; height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; }
+button, select, input { font: inherit; }
+button, select { color: var(--text); }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+button { border: 1px solid var(--border); background: var(--surface-2); border-radius: var(--radius); }
+select { border: 1px solid var(--border); background: var(--surface-2); border-radius: 4px; padding: 7px 28px 7px 9px; }
+b, strong { font-weight: 600; }
+[hidden] { display: none !important; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }

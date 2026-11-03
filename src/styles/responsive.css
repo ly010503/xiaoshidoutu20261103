@@ -1,0 +1,14 @@
+@media (max-width: 1450px) {
+  :root { --left-w: 290px; --right-w: 342px; }
+  .workspace { gap:4px;padding:4px; }.tool-section,.right-section{padding-left:10px;padding-right:10px}.status-metrics{gap:11px}.size-tabs{grid-template-columns:repeat(7,minmax(65px,1fr))}.size-tabs button{font-size:11px}.viewport-tools #actualSize{display:none}
+}
+@media (max-width: 1180px) {
+  :root { --left-w: 280px; --right-w: 300px; }
+  .top-actions .ghost-btn span { display:none; }.status-metrics span:nth-of-type(n+5){display:none}.thumbnail-grid{grid-template-columns:1fr}.thumb-card canvas,.thumb-card .waiting{height:80px}.modes{min-width:245px}.viewport-tools #fitView{font-size:0}.viewport-tools #fitView::after{content:'适应';font-size:11px}
+}
+@media (max-width: 900px) {
+  html,body{overflow:auto;height:auto}.topbar{position:sticky;top:0}.workspace{grid-template-columns:1fr;display:block;min-width:0;width:100%}.left-panel,.right-panel,.center-panel{width:100%;max-width:100%;margin-bottom:6px}.center-panel{height:72vh;min-height:600px}.right-panel{display:grid;grid-template-columns:1fr 1fr;overflow:visible}.statusbar{position:sticky;bottom:0}.status-metrics{display:none}.export-actions{width:100%;justify-content:flex-end}.topbar::after{content:'建议使用电脑浏览器制作复杂拼豆图纸';position:absolute;top:58px;left:0;right:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;padding:5px;background:#332e68;color:#ddd8ff;font-size:10px}.workspace{padding-top:29px}.thumbnail-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width: 600px) {
+  #app{min-width:0}.version,.badge,.top-actions{display:none}.right-panel{display:block}.thumbnail-grid{grid-template-columns:1fr 1fr}.preview-toolbar{align-items:flex-start;flex-direction:column}.viewport-tools{width:100%;justify-content:flex-end}.size-tabs{overflow-x:auto;display:flex}.size-tabs button{min-width:82px}.canvas-footer{align-items:flex-start;flex-direction:column}.display-toggles{flex-wrap:wrap}.export-actions>span,.export-actions button:disabled{display:none}.export-actions{justify-content:center}.center-panel{height:75vh}.brand-name{font-size:14px}.transform-grid{grid-template-columns:repeat(3,1fr)}
+}
