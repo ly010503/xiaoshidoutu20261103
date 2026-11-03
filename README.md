@@ -103,6 +103,45 @@ npm test
 - Cloudflare：`worker/index.js` 处理这两个接口，其余请求交给静态资源。
 - 只用普通静态服务器（GitHub Pages 等）时，链接导入不可用，其他功能不受影响。
 
+### 腾讯云 EdgeOne Makers 静态部署
+
+保留原有 `npm run build`，供现有部署环境使用。EdgeOne 请使用独立命令 `npm run build:edgeone`，它只执行 `vite build`，不运行 Sites 专用的 `scripts/prepare-sites-build.mjs`，因此不要求存在未提交到仓库的 `.openai/hosting.json`。
+
+在 EdgeOne 的项目构建设置中填写：
+
+| 配置项 | 值 |
+| --- | --- |
+| 项目根目录 | 仓库根目录（`package.json` 所在目录） |
+| 安装命令 | `npm ci --include=dev` |
+| 构建命令 | `npm run build:edgeone` |
+| 静态网站输出目录 | `dist/client` |
+| Node.js 版本 | `22.21.1` 或满足依赖要求的更新版本（Vite 要求 `^20.19.0` 或 `>=22.12.0`，Wrangler 要求 `>=22.0.0`） |
+
+仓库根目录的 `edgeone.json` 已保存上述安装、构建、输出目录和 Node.js 设置，并为现有功能页配置精确的内部重写。EdgeOne 会优先使用该文件中的配置，详见 [EdgeOne 配置说明](https://pages.edgeone.ai/zh/document/edgeone-json)。其他部署平台继续使用各自配置。
+
+当前 Vite 配置包含 Cloudflare 插件，因此客户端产物位于 `dist/client/`，不是默认的 `dist/`：
+
+```text
+dist/
+├── client/
+│   ├── index.html          # 静态网站入口
+│   ├── photo.html          # 各功能页面，另有 recover/text/link/library/editor.html
+│   ├── favicon.svg
+│   ├── robots.txt
+│   └── assets/             # 带哈希的 JS、CSS、示例图片及字体分片
+└── perler_pattern_web/     # Cloudflare Worker 构建产物，不是 EdgeOne 静态输出目录
+```
+
+整个 `dist/client` 应作为网站根目录发布，浏览器访问的是 `/index.html`、`/assets/...`，URL 中不要添加 `/dist/client`。现有 `base: '/'` 适用于域名根路径部署，不适用于挂载到 `/某个子目录/`。
+
+- 图片、JS、CSS 和按需加载的字体均由 Vite 处理资源路径，随 `dist/client` 一起发布，无需配置外部字体 CDN。
+- 图纸算法的 Web Worker 使用 `new Worker(new URL(..., import.meta.url))`，由 Vite 打包处理，不需要服务端 Worker 运行环境；它与 `dist/perler_pattern_web` 的 Cloudflare Worker 是两回事。
+- PNG、PDF、ZIP 和工程文件在浏览器中生成并下载；PDF 不依赖服务器接口或外部 PDF 模板。
+- 页面使用 `/photo`、`/text` 等无扩展名路径；`edgeone.json` 将六个现有功能路径分别重写到对应的 `.html`，不拦截 `/assets/` 或 `/api/`。部署后应确认功能页可以直接打开和刷新。
+- 这套配置仅部署静态网站，不会把 `api/` 的 Vercel 函数或 `worker/index.js` 自动转换成 EdgeOne 函数。“链接导入”的 `/api/resolve-link`、`/api/link-image` 需另行接入后端；相关源码保留，其他本地处理功能不依赖这两个接口。
+
+本地验证命令：`npm run build:edgeone`。可选设置环境变量 `SITE_URL=https://你的域名` 后再构建，以生成网站地图和 canonical 地址。
+
 ### 页面地址与搜索收录
 
 各功能是独立路径：`/`、`/photo`、`/recover`、`/text`、`/link`、`/library`、`/editor`，路径、标题和描述集中在 `src/state/pages.js`。构建时每个页面生成一份 HTML（如 `photo.html`），带各自的 `<title>`、`description` 和顶部标题；`/library`、`/editor` 依赖本机数据，标记为不收录。旧版 `#photo` 这类地址会自动跳到对应路径。

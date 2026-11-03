@@ -1,0 +1,14 @@
+{
+  "installCommand": "npm ci --include=dev",
+  "buildCommand": "npm run build:edgeone",
+  "outputDirectory": "dist/client",
+  "nodeVersion": "22.21.1",
+  "rewrites": [
+    { "source": "/photo", "destination": "/photo.html" },
+    { "source": "/recover", "destination": "/recover.html" },
+    { "source": "/text", "destination": "/text.html" },
+    { "source": "/link", "destination": "/link.html" },
+    { "source": "/library", "destination": "/library.html" },
+    { "source": "/editor", "destination": "/editor.html" }
+  ]
+}
