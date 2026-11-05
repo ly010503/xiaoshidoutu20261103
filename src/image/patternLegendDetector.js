@@ -83,7 +83,8 @@ function connectedComponents(imageData, region, background, minimumUnit) {
     const density = tail / (componentWidth * componentHeight);
     if (componentWidth < minimumUnit * 0.65 || componentHeight < minimumUnit * 0.65) continue;
     if (componentWidth > minimumUnit * 4.5 || componentHeight > minimumUnit * 4.5) continue;
-    if (aspect < 0.5 || aspect > 1.8 || density < 0.07) continue;
+    // 带色号和用量的长方形色卡宽高比约 1.8，放宽一些，避免卡在边界上时时灵时不灵。
+    if (aspect < 0.5 || aspect > 2.4 || density < 0.07) continue;
     components.push({
       left: region.left + minX,
       right: region.left + maxX + 1,
@@ -171,6 +172,23 @@ function groupPitch(group, orientation) {
   }
   gaps.sort((first, second) => first - second);
   return median(gaps.slice(0, Math.max(1, Math.ceil(gaps.length * 0.6))));
+}
+
+// 图例换行后最后一排可能只有一两张色卡，不足以单独判断规律，
+// 但大小相同、又落在上一排的列位置上，就是同一张图例的一部分。
+function isShortRowOfGroup(row, group, orientation) {
+  const pitch = groupPitch(group, orientation);
+  if (!Number.isFinite(pitch) || pitch < 4) return false;
+  const axis = (component) => (orientation === 'horizontal' ? component.centerX : component.centerY);
+  const width = median(group.map((component) => component.width));
+  const height = median(group.map((component) => component.height));
+  const origin = axis(group[0]);
+  return row.every((component) => {
+    const columns = (axis(component) - origin) / pitch;
+    return Math.abs(columns - Math.round(columns)) <= 0.2
+      && Math.abs(component.width - width) <= width * 0.25
+      && Math.abs(component.height - height) <= height * 0.25;
+  });
 }
 
 function componentAt(center, width, height) {
@@ -306,7 +324,8 @@ export function detectPatternLegend(imageData, detection, palette, options = {})
       component.width >= minimumUnit * 1.6
       && component.height >= minimumUnit * 1.6
     ));
-    const regularGroups = parallelAlignedGroups(swatchComponents, region.orientation)
+    const alignedGroups = parallelAlignedGroups(swatchComponents, region.orientation);
+    const regularGroups = alignedGroups
       .map((rawGroup) => ({ rawGroup, regularity: groupRegularity(rawGroup, region.orientation) }))
       .filter(({ rawGroup, regularity }) => rawGroup.length >= minimumSwatches && regularity >= 0.68)
       .map(({ rawGroup, regularity }) => ({
@@ -321,7 +340,10 @@ export function detectPatternLegend(imageData, detection, palette, options = {})
         && Number.isFinite(pitch)
         && Math.abs(pitch - referencePitch) <= Math.max(3, referencePitch * 0.22);
     });
-    const group = compatibleGroups.flatMap((item) => item.group);
+    const shortRows = alignedGroups
+      .filter((rawGroup) => rawGroup.length && rawGroup.length < minimumSwatches)
+      .filter((rawGroup) => isShortRowOfGroup(rawGroup, regularGroups[0].group, region.orientation));
+    const group = [...compatibleGroups.flatMap((item) => item.group), ...shortRows.flat()];
     const regularity = compatibleGroups.reduce((sum, item) => sum + item.regularity, 0)
       / Math.max(1, compatibleGroups.length);
     const matches = group.map((component) => {

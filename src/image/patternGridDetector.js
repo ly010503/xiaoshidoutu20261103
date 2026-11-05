@@ -118,8 +118,11 @@ function edgeProfile(luma, width, height, axis, bounds) {
   return profile;
 }
 
-function gridLineContinuity(luma, width, height, axis, position, bounds) {
+function gridLineContinuity(luma, width, height, axis, position, bounds, pitch, { exact = false, step = 1 } = {}) {
   const coordinate = Math.round(position);
+  // 外框和加粗线随格子变粗，线的边缘会离中心几像素，搜索范围要跟着格距放宽。
+  // exact 用于校准格距：只看线中心附近，才分得出差一点点的格距。
+  const reach = exact ? 1 : Math.max(1, Math.ceil(pitch / 10));
   const crossStart = axis === 'x'
     ? clamp(Math.floor(bounds.top), 1, height - 1)
     : clamp(Math.floor(bounds.left), 1, width - 1);
@@ -128,9 +131,9 @@ function gridLineContinuity(luma, width, height, axis, position, bounds) {
     : clamp(Math.ceil(bounds.right), crossStart + 1, width);
   let continuous = 0;
   let total = 0;
-  for (let cross = crossStart; cross < crossEnd; cross += 1) {
+  for (let cross = crossStart; cross < crossEnd; cross += step) {
     let strongest = 0;
-    for (let offset = -1; offset <= 1; offset += 1) {
+    for (let offset = -reach; offset <= reach; offset += 1) {
       if (axis === 'x') {
         const x = clamp(coordinate + offset, 1, width - 1);
         const current = cross * width + x;
@@ -161,7 +164,7 @@ function refineFitUsingContinuousLines(luma, width, height, axis, bounds, fit) {
     const position = fit.phase + index * fit.pitch;
     lines.push({
       position,
-      continuity: gridLineContinuity(luma, width, height, axis, position, bounds),
+      continuity: gridLineContinuity(luma, width, height, axis, position, bounds, fit.pitch),
     });
   }
   if (lines.length < 8) return fit;
@@ -169,21 +172,27 @@ function refineFitUsingContinuousLines(luma, width, height, axis, bounds, fit) {
   // 连续网格线在绝大多数截面上都有梯度；坐标数字虽然按格距重复，
   // 但只覆盖每格的一小段。阈值保持较高，低于时直接回退旧边界。
   const threshold = Math.max(0.88, high * 0.88);
-  const active = bridgeSmallGaps(lines.map((line) => line.continuity >= threshold), 1);
+  // 细线画在亮度相近的豆子上会几乎看不见，连续率掉到三四成，但它们仍是网格线；
+  // 网格外（包括上下方的图例色卡之间）则接近 0。所以只有接近 0 才算断开，
+  // 再把首尾收到真正清晰的线上，不会把坐标数字或色卡并进来。
+  const isStrong = (line) => line.continuity >= threshold;
+  const active = lines.map((line) => line.continuity >= 0.3);
   let best = null;
   let cursor = 0;
   while (cursor < active.length) {
     if (!active[cursor]) { cursor += 1; continue; }
-    const start = cursor;
-    let continuity = 0;
-    while (cursor < active.length && active[cursor]) {
-      continuity += lines[cursor].continuity;
-      cursor += 1;
-    }
-    const end = cursor - 1;
-    const count = end - start + 1;
-    const score = count + continuity / Math.max(1, count);
-    if (!best || score > best.score) best = { start, end, count, score };
+    let start = cursor;
+    while (cursor < active.length && active[cursor]) cursor += 1;
+    let end = cursor - 1;
+    while (start <= end && !isStrong(lines[start])) start += 1;
+    while (end >= start && !isStrong(lines[end])) end -= 1;
+    if (start > end) continue;
+    const segment = lines.slice(start, end + 1);
+    const count = segment.length;
+    const strongCount = segment.filter(isStrong).length;
+    const continuity = segment.reduce((sum, line) => sum + line.continuity, 0);
+    const score = strongCount + continuity / count;
+    if (!best || score > best.score) best = { start, end, count, score, strongRatio: strongCount / count };
   }
   if (!best || best.count < 8) return fit;
   const first = lines[best.start].position;
@@ -191,15 +200,18 @@ function refineFitUsingContinuousLines(luma, width, height, axis, bounds, fit) {
   const cells = Math.max(0, Math.round((last - first) / fit.pitch));
   const overlapsPrevious = last >= fit.first - fit.pitch && first <= fit.last + fit.pitch;
   const plausibleChange = cells >= fit.cells * 0.72 && cells <= fit.cells * 1.28;
-  return overlapsPrevious && plausibleChange ? { ...fit, first, last, cells } : fit;
+  // 四周留白多的图纸，初判只会落在有豆子的那一段，真实格数可能比初判多很多。
+  // 一整段等距且大多清晰的长线不会是偶然，此时向外扩展不受上面的比例限制。
+  const confidentExpansion = cells > fit.cells && best.strongRatio >= 0.6;
+  return overlapsPrevious && (plausibleChange || confidentExpansion) ? { ...fit, first, last, cells } : fit;
 }
 
 function trimSymmetricWeakBoundaryLines(luma, width, height, axis, bounds, fit) {
   if (fit.cells < 12) return fit;
-  const first = gridLineContinuity(luma, width, height, axis, fit.first, bounds);
-  const second = gridLineContinuity(luma, width, height, axis, fit.first + fit.pitch, bounds);
-  const beforeLast = gridLineContinuity(luma, width, height, axis, fit.last - fit.pitch, bounds);
-  const last = gridLineContinuity(luma, width, height, axis, fit.last, bounds);
+  const first = gridLineContinuity(luma, width, height, axis, fit.first, bounds, fit.pitch);
+  const second = gridLineContinuity(luma, width, height, axis, fit.first + fit.pitch, bounds, fit.pitch);
+  const beforeLast = gridLineContinuity(luma, width, height, axis, fit.last - fit.pitch, bounds, fit.pitch);
+  const last = gridLineContinuity(luma, width, height, axis, fit.last, bounds, fit.pitch);
   const weakOutside = first < 0.88 && last < 0.88;
   const strongInside = second >= 0.94 && beforeLast >= 0.94;
   return weakOutside && strongInside
@@ -234,7 +246,8 @@ function correlationAt(values, start, end, lag) {
 
 function estimatePitch(profile, start, end, minimumCells) {
   const length = end - start + 1;
-  const maximumPitch = Math.min(40, Math.floor(length / minimumCells));
+  // 小尺寸图纸（如 29×29）缩放后每格可以超过 40 像素。
+  const maximumPitch = Math.min(80, Math.floor(length / minimumCells));
   const correlations = new Map();
   for (let lag = 4; lag <= maximumPitch * 3; lag += 1) {
     correlations.set(lag, correlationAt(profile, start, end, lag));
@@ -268,6 +281,31 @@ function estimatePitch(profile, start, end, minimumCells) {
     }
   }
   return best;
+}
+
+/**
+ * 拼豆格子是正方形，两条轴的格距应当相同。某一轴单独估算时有两种常见错误：
+ * 落在加粗辅助线上（格距的 2、3、5 倍），或可用范围太短、估出的格距很弱。
+ * 这时用另一条更可信的轴来纠正。
+ */
+function reconcileCellPitches(x, y, xSpan, ySpan, width, height) {
+  const result = { x, y, xSpan, ySpan };
+  const [smallAxis, largeAxis] = x.lag <= y.lag ? ['x', 'y'] : ['y', 'x'];
+  const small = result[smallAxis];
+  const large = result[largeAxis];
+  const ratio = large.lag / small.lag;
+  const isHarmonic = [2, 3, 5].some((multiple) => Math.abs(ratio - multiple) <= multiple * 0.04);
+  if (isHarmonic && small.correlation >= 0.2) {
+    result[largeAxis] = { ...large, lag: small.lag };
+    return result;
+  }
+  if (Math.abs(ratio - 1) > 0.15 && small.correlation < 0.2 && large.correlation >= small.correlation * 1.5) {
+    // 弱的一轴往往是活跃范围过短，改用整条轴拟合。
+    result[smallAxis] = { ...small, lag: large.lag };
+    const length = smallAxis === 'x' ? width : height;
+    result[`${smallAxis}Span`] = { start: 0, end: length - 1 };
+  }
+  return result;
 }
 
 function interpolate(values, position) {
@@ -309,6 +347,49 @@ function fitGrid(profile, start, end, estimatedPitch) {
     ...best,
     first,
     last,
+    cells: Math.max(0, lastIndex - firstIndex),
+  };
+}
+
+/**
+ * 初判只看有豆子的一小段，格距差 0.03px，推到几十格外就会偏出网格线。
+ * 这里在整条轴上校准一次格距和相位。评分用线条连续率而不是边缘强度：
+ * 格内色号文字的边缘很强但不连贯，用强度评分会被文字带偏。
+ */
+function tunePitchAcrossAxis(luma, width, height, axis, bounds, fit) {
+  const axisLength = axis === 'x' ? width : height;
+  const crossLength = axis === 'x' ? bounds.bottom - bounds.top : bounds.right - bounds.left;
+  const step = Math.max(1, Math.floor(crossLength / 48));
+  const center = (fit.first + fit.last) / 2;
+  const anchor = fit.phase + Math.round((center - fit.phase) / fit.pitch) * fit.pitch;
+  const candidates = [];
+  for (let pitchChange = -0.12; pitchChange <= 0.12001; pitchChange += 0.005) {
+    const pitch = fit.pitch + pitchChange;
+    if (pitch < 3.5) continue;
+    for (let shift = -1; shift <= 1; shift += 0.25) {
+      const origin = anchor + shift;
+      let score = 0;
+      for (let index = Math.ceil((0 - origin) / pitch); origin + index * pitch <= axisLength - 1; index += 1) {
+        score += gridLineContinuity(luma, width, height, axis, origin + index * pitch, bounds, pitch, { exact: true, step });
+      }
+      candidates.push({ pitch, origin, score });
+    }
+  }
+  // 线有宽度，一小段格距都能得满分；取这段的中点才最接近真实格距。
+  const topScore = Math.max(...candidates.map((candidate) => candidate.score));
+  const plateau = candidates.filter((candidate) => candidate.score >= topScore * 0.985);
+  const best = {
+    pitch: plateau.reduce((sum, candidate) => sum + candidate.pitch, 0) / plateau.length,
+    origin: plateau.reduce((sum, candidate) => sum + candidate.origin, 0) / plateau.length,
+  };
+  const firstIndex = Math.round((fit.first - best.origin) / best.pitch);
+  const lastIndex = Math.round((fit.last - best.origin) / best.pitch);
+  return {
+    ...fit,
+    pitch: best.pitch,
+    phase: best.origin,
+    first: best.origin + firstIndex * best.pitch,
+    last: best.origin + lastIndex * best.pitch,
     cells: Math.max(0, lastIndex - firstIndex),
   };
 }
@@ -531,26 +612,43 @@ export function analyzePatternGrid(imageData, options = {}) {
   };
   const xProfile = edgeProfile(luma, width, height, 'x', roughBounds);
   const yProfile = edgeProfile(luma, width, height, 'y', roughBounds);
-  const xPitch = estimatePitch(xProfile, xSpan.start, xSpan.end, minimumCells);
-  const yPitch = estimatePitch(yProfile, ySpan.start, ySpan.end, minimumCells);
-  const initialXFit = extendFitAcrossVisibleGrid(xProfile, fitGrid(xProfile, xSpan.start, xSpan.end, xPitch.lag));
-  const initialYFit = extendFitAcrossVisibleGrid(yProfile, fitGrid(yProfile, ySpan.start, ySpan.end, yPitch.lag));
-  const xFit = refineFitUsingContinuousLines(
-    luma,
+  const pitches = reconcileCellPitches(
+    estimatePitch(xProfile, xSpan.start, xSpan.end, minimumCells),
+    estimatePitch(yProfile, ySpan.start, ySpan.end, minimumCells),
+    xSpan,
+    ySpan,
     width,
     height,
-    'x',
-    { ...roughBounds, top: initialYFit.first, bottom: initialYFit.last },
-    initialXFit,
   );
-  const refinedYFit = refineFitUsingContinuousLines(
-    luma,
-    width,
-    height,
-    'y',
-    { ...roughBounds, left: xFit.first, right: xFit.last },
-    initialYFit,
+  const xPitch = pitches.x;
+  const yPitch = pitches.y;
+  const tuned = (axis, profile, span, lag) => extendFitAcrossVisibleGrid(
+    profile,
+    tunePitchAcrossAxis(luma, width, height, axis, roughBounds, fitGrid(profile, span.start, span.end, lag)),
   );
+  const initialXFit = tuned('x', xProfile, pitches.xSpan, xPitch.lag);
+  const initialYFit = tuned('y', yProfile, pitches.ySpan, yPitch.lag);
+  // 两个方向的连续率都要用对方的范围来算，一方修正后另一方可能才看得清，所以各走两轮。
+  let xFit = initialXFit;
+  let refinedYFit = initialYFit;
+  for (let pass = 0; pass < 2; pass += 1) {
+    xFit = refineFitUsingContinuousLines(
+      luma,
+      width,
+      height,
+      'x',
+      { ...roughBounds, top: refinedYFit.first, bottom: refinedYFit.last },
+      xFit,
+    );
+    refinedYFit = refineFitUsingContinuousLines(
+      luma,
+      width,
+      height,
+      'y',
+      { ...roughBounds, left: xFit.first, right: xFit.last },
+      refinedYFit,
+    );
+  }
   const yFit = trimSymmetricWeakBoundaryLines(
     luma,
     width,
@@ -656,35 +754,56 @@ export function detectPatternOccupiedCells(
   const textContrast = options.textContrast ?? 80;
   const minimumTextPixels = options.minimumTextPixels ?? 6;
   const { left, right, top, bottom } = detection.bounds;
+  const cellHasText = (gridX, gridY, fill) => {
+    const cellLeft = left + (right - left) * gridX / width;
+    const cellRight = left + (right - left) * (gridX + 1) / width;
+    const cellTop = top + (bottom - top) * gridY / height;
+    const cellBottom = top + (bottom - top) * (gridY + 1) / height;
+    const x0 = clamp(Math.ceil(cellLeft + (cellRight - cellLeft) * 0.2), 0, imageData.width - 1);
+    const x1 = clamp(Math.floor(cellRight - (cellRight - cellLeft) * 0.2), x0, imageData.width - 1);
+    const y0 = clamp(Math.ceil(cellTop + (cellBottom - cellTop) * 0.25), 0, imageData.height - 1);
+    const y1 = clamp(Math.floor(cellBottom - (cellBottom - cellTop) * 0.25), y0, imageData.height - 1);
+    let contrastingPixels = 0;
+    for (let y = y0; y <= y1; y += 1) {
+      for (let x = x0; x <= x1; x += 1) {
+        const sourceOffset = (y * imageData.width + x) * 4;
+        if (colorDistance([
+          imageData.data[sourceOffset],
+          imageData.data[sourceOffset + 1],
+          imageData.data[sourceOffset + 2],
+        ], fill) >= textContrast) {
+          contrastingPixels += 1;
+          if (contrastingPixels >= minimumTextPixels) return true;
+        }
+      }
+    }
+    return false;
+  };
+  const fillAt = (position) => {
+    const offset = position * 4;
+    return [pixels[offset], pixels[offset + 1], pixels[offset + 2]];
+  };
+  // 铺满水印会把空格染上一层浅色，单看底色会误判成浅色豆子。
+  // 如果颜色明显的豆子基本都印着色号，说明这是带色号的图纸，浅色格也要有色号才算豆子。
+  const clearlyFilledDistance = options.clearlyFilledDistance ?? 60;
+  let clearlyFilled = 0;
+  let clearlyFilledWithText = 0;
+  for (let gridY = 0; gridY < height; gridY += 1) {
+    for (let gridX = 0; gridX < width; gridX += 1) {
+      const fill = fillAt(gridY * width + gridX);
+      if (colorDistance(fill, background) < clearlyFilledDistance) continue;
+      clearlyFilled += 1;
+      if (cellHasText(gridX, gridY, fill)) clearlyFilledWithText += 1;
+    }
+  }
+  const sheetHasCodes = clearlyFilled >= 8 && clearlyFilledWithText / clearlyFilled >= 0.6;
   for (let gridY = 0; gridY < height; gridY += 1) {
     for (let gridX = 0; gridX < width; gridX += 1) {
       const position = gridY * width + gridX;
-      const offset = position * 4;
-      const fill = [pixels[offset], pixels[offset + 1], pixels[offset + 2]];
-      if (colorDistance(fill, background) >= minimumFillDistance) {
-        occupied[position] = 1;
-        continue;
-      }
-      const cellLeft = left + (right - left) * gridX / width;
-      const cellRight = left + (right - left) * (gridX + 1) / width;
-      const cellTop = top + (bottom - top) * gridY / height;
-      const cellBottom = top + (bottom - top) * (gridY + 1) / height;
-      const x0 = clamp(Math.ceil(cellLeft + (cellRight - cellLeft) * 0.2), 0, imageData.width - 1);
-      const x1 = clamp(Math.floor(cellRight - (cellRight - cellLeft) * 0.2), x0, imageData.width - 1);
-      const y0 = clamp(Math.ceil(cellTop + (cellBottom - cellTop) * 0.25), 0, imageData.height - 1);
-      const y1 = clamp(Math.floor(cellBottom - (cellBottom - cellTop) * 0.25), y0, imageData.height - 1);
-      let contrastingPixels = 0;
-      for (let y = y0; y <= y1 && contrastingPixels < minimumTextPixels; y += 1) {
-        for (let x = x0; x <= x1; x += 1) {
-          const sourceOffset = (y * imageData.width + x) * 4;
-          if (colorDistance([
-            imageData.data[sourceOffset],
-            imageData.data[sourceOffset + 1],
-            imageData.data[sourceOffset + 2],
-          ], fill) >= textContrast) contrastingPixels += 1;
-        }
-      }
-      if (contrastingPixels >= minimumTextPixels) occupied[position] = 1;
+      const fill = fillAt(position);
+      const distance = colorDistance(fill, background);
+      const trustFill = sheetHasCodes ? distance >= clearlyFilledDistance : distance >= minimumFillDistance;
+      if (trustFill || cellHasText(gridX, gridY, fill)) occupied[position] = 1;
     }
   }
   return occupied;
