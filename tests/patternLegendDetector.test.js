@@ -75,6 +75,36 @@ test('大量色块只映射为少数色号时拒绝用作限色色卡', () => {
   assert.equal(detectPatternLegend(createRepeatedLegendImage(), repeatedDetection, palette), null);
 });
 
+test('图例最后一排只有一两张色卡时也算进来，长方形色卡同样能识别', () => {
+  const shortRowPalette = preparePalette([
+    { code: 'A1', hex: '#FFF2A8' }, { code: 'A2', hex: '#FFB04A' },
+    { code: 'B1', hex: '#A8E08C' }, { code: 'C1', hex: '#63CFE8' },
+    { code: 'D1', hex: '#A78BDD' }, { code: 'E1', hex: '#F4A6C1' },
+    { code: 'F1', hex: '#E85C68' },
+  ]);
+  const width = 340, height = 250;
+  const data = new Uint8ClampedArray(width * height * 4).fill(255);
+  shortRowPalette.forEach((color, index) => {
+    const row = Math.floor(index / 5), column = index % 5;
+    const left = 20 + column * 60, top = 165 + row * 38;
+    // 色卡宽高比 1.82，与导出图纸的色卡一致。
+    for (let y = top; y < top + 22; y += 1) for (let x = left; x < left + 40; x += 1) {
+      const offset = (y * width + x) * 4;
+      data[offset] = color.rgb[0]; data[offset + 1] = color.rgb[1]; data[offset + 2] = color.rgb[2];
+    }
+  });
+  const shortRowDetection = {
+    cellWidth: 10,
+    cellHeight: 10,
+    bounds: { left: 20, right: 320, top: 20, bottom: 145 },
+    rawBounds: { left: 20, right: 320, top: 20, bottom: 145 },
+  };
+  const legend = detectPatternLegend({ width, height, data }, shortRowDetection, shortRowPalette);
+  assert.ok(legend);
+  assert.equal(legend.swatchCount, 7);
+  assert.deepEqual([...legend.paletteCodes].sort(), shortRowPalette.map((color) => color.code).sort());
+});
+
 test('会合并同一图例中的多行大色块', () => {
   const multiPalette = preparePalette([
     { code: 'A1', hex: '#FFF2A8' }, { code: 'A2', hex: '#FFB04A' },
